@@ -1,4 +1,4 @@
-package hr.stratusit.webshop.model;
+package hr.stratusit.webshop.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

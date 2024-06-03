@@ -1,5 +1,7 @@
 package hr.stratusit.webshop.model;
 
+import hr.stratusit.webshop.service.RentalPeriod;
+
 import java.util.List;
 
 public class Boat {

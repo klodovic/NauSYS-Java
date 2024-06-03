@@ -1,4 +1,4 @@
-package hr.stratusit.webshop.model;
+package hr.stratusit.webshop.service;
 
 import hr.stratusit.webshop.service.IProduct;
 import hr.stratusit.webshop.service.IShoppingItem;

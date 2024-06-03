@@ -1,54 +1,60 @@
 package hr.stratusit.webshop.utills;
 
 import hr.stratusit.webshop.model.Boat;
-import hr.stratusit.webshop.model.RentalPeriod;
-
+import hr.stratusit.webshop.service.RentalPeriod;
+import static hr.stratusit.webshop.utills.Constants.*;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class Calculator {
-    public BigDecimal calculatePrice(List<Boat> boats, int id, String start, int rentalDuration) {
+    public String calculatePrice(List<Boat> boats, int id, String start, String end) throws ParseException {
 
-        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        BigDecimal price = BigDecimal.ZERO;
+        LocalDate rentalEnd = LocalDate.parse(end, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        String message = "";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
+        Date endOfRental = sdf.parse(end);
+        BigDecimal sum = BigDecimal.ZERO;
 
         for (int i = 0; i < boats.size(); i++) {
             int boatId = boats.get(i).getId();
             if (id == boatId){
                 List<RentalPeriod> rp = boats.get(i).getRentalPeriods();
                 for (int j = 0; j < rp.size(); j++) {
-
-                    if ((rp.get(0).getStart()).isEqual(startDate) || (rp.get(0).getStart()).isAfter(startDate)) {
-                        price = sumCalculating(rp.get(0).getPrice(), rentalDuration);
-                        break;
+                    //check if ending rental day is after ending period (Calculate number of days and price)
+                    if (rentalEnd.isAfter(rp.get(j).getEnd())){
+                        Date endOfPeriod = Date.from(rp.get(j).getEnd().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                        Date startOfPeriod = Date.from(rp.get(j).getStart().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                        BigDecimal price = rp.get(j).getPrice();
+                        sum = sum.add(priceCalculation(endOfPeriod, startOfPeriod, price));
                     }
-                    else if ((rp.get(1).getStart()).isEqual(startDate) || (rp.get(1).getStart()).isAfter(startDate)) {
-                        price = sumCalculating(rp.get(1).getPrice(), rentalDuration);
-                        break;
-                    }
-                    else if ((rp.get(2).getStart()).isEqual(startDate) || (rp.get(2).getStart()).isAfter(startDate)) {
-                        price = sumCalculating(rp.get(2).getPrice(), rentalDuration);
-                        break;
-                    }
-                    else if ((rp.get(3).getStart()).isEqual(startDate) || (rp.get(3).getStart()).isAfter(startDate)) {
-                        price = sumCalculating(rp.get(3).getPrice(), rentalDuration);
+                    //Calculation within the period
+                    else{
+                        Date startOfPeriod = Date.from(rp.get(j).getStart().atStartOfDay(ZoneId.systemDefault()).toInstant());
+                        BigDecimal price = rp.get(j).getPrice();
+                        sum = sum.add(priceCalculation(endOfRental, startOfPeriod, price));
                         break;
                     }
                 }
-                break;
+                message = "Total price: " + sum;
             }
         }
-        return price;
+        return message;
     }
 
-
-    private BigDecimal sumCalculating(BigDecimal boatPrice, int rentalDuration) {
-        BigDecimal price = BigDecimal.ZERO;
-        price = price.add(boatPrice);
-        price = price.multiply(BigDecimal.valueOf(rentalDuration));
-        return price;
+    private static BigDecimal priceCalculation(Date end, Date start, BigDecimal price) {
+        BigDecimal sum = BigDecimal.ZERO;
+        long differenceInMilliseconds = Math.abs(end.getTime() - start.getTime());
+        BigDecimal days = new BigDecimal(differenceInMilliseconds / MILLISECONDS);
+        BigDecimal sumTemp = days.multiply(price);
+        sum = sum.add(sumTemp);
+        return sum;
     }
 
 }

@@ -1,8 +1,7 @@
-package hr.stratusit.webshop.model;
+package hr.stratusit.webshop.service;
 
-import hr.stratusit.webshop.service.IProduct;
-import hr.stratusit.webshop.service.IShoppingCart;
-import hr.stratusit.webshop.service.IShoppingItem;
+import hr.stratusit.webshop.model.Product;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;

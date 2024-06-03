@@ -1,26 +1,24 @@
 package hr.stratusit.webshop;
 
+import hr.stratusit.webshop.dal.ProductLoader;
 import hr.stratusit.webshop.model.Boat;
 import hr.stratusit.webshop.model.Product;
-import hr.stratusit.webshop.model.RentalPeriod;
-import hr.stratusit.webshop.model.ShoppingCart;
-import hr.stratusit.webshop.service.IProduct;
-import hr.stratusit.webshop.service.IShoppingCart;
+import hr.stratusit.webshop.service.ShoppingCart;
 import hr.stratusit.webshop.service.IShoppingItem;
 import hr.stratusit.webshop.utills.Calculator;
 import hr.stratusit.webshop.utills.LoadData;
+import hr.stratusit.webshop.utills.Validation;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.text.ParseException;
 import java.util.List;
 
 
 @SpringBootApplication
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParseException {
 		SpringApplication.run(Main.class, args);
 
 		/* Task 1 */
@@ -29,53 +27,49 @@ public class Main {
 	    List<Boat> boats = loadData.readCSV();
 
 		System.out.println();
-		System.out.println("**********  TAST 1 - CSV  **********");
-		for (int i = 0; i < boats.size(); i++) {
-			System.out.println(boats.get(i).getId() + " Boat: " + boats.get(i));
-		}
+		System.out.println("**********  TASK 1 - CSV  **********");
+        for (Boat boat : boats) {
+            System.out.println(boat.getId() + " Boat: " + boat);
+        }
 		System.out.println();
 
-		//Calculating rental price
+		// Calculator
 		Calculator calculator = new Calculator();
+		Validation validation = new Validation();
+
+		// User inputs
 		int id = 3;
-		//String start = "2021-01-01";
-		//String start = "2021-04-02";
-		//String start = "2021-07-16";
-		String start = "2021-10-02";
-		int rentalDuration = 2;
+		String rentalStart = "06.01.2021";
+		String rentalEnd = "08.01.2021";
 
-	    BigDecimal price = calculator.calculatePrice(boats, id, start, rentalDuration);
-		System.out.println("Rental price is: " + price);
+		// Input validation and calculation
+		if (!validation.isDateValid(rentalStart, rentalEnd)){
+			System.out.println("Error: The date must be in 2021.");
+		}
+		else if (!validation.isRentalEndsBeforeRentalStart(rentalStart, rentalEnd)){
+			System.out.println("Error: End of rental date can't be lower than start of rental date...");
+		}
+		else {
+			String output = calculator.calculatePrice(boats, id, rentalStart, rentalEnd);
+			System.out.println("Rental price is: " + output);
+		}
+
 		System.out.println();
-
+		System.out.println("------------------------------------------------------------------------------------------------------------------------");
+		System.out.println();
 
 		/* Task 2 */
-		//Webshop
-		System.out.println("**********  TASK 2 - WEBSHOP  **********");
+		//Web shop
+		System.out.println("**********  TASK 2 - WEB SHOP  **********");
 		System.out.println("*** Cart before adding items ***");
 
-		Product p = new Product(
-				"Honda",
-				"Yaht",
-				"Lorem Ipsum is simply dummy text",
-				new BigDecimal(100),
-				new BigDecimal(100));
+		// Products
+		ProductLoader productLoader = new ProductLoader();
+		Product p = productLoader.getProducts().get(0);
+		Product p1 = productLoader.getProducts().get(1);
+		Product p2 = productLoader.getProducts().get(2);
 
-		Product p1 = new Product(
-				"Honda2",
-				"Boat",
-				"Lorem Ipsum",
-				new BigDecimal(170),
-				new BigDecimal(200));
-
-		Product p2 = new Product(
-				"Yamaha",
-				"Boat",
-				"Lorem Ipsum - Lorem Ipsum",
-				new BigDecimal(55),
-				new BigDecimal(300));
-
-
+		//Creating cart
 		ShoppingCart cart = new ShoppingCart(2L,"Marko");
 
 		//Shopping cart is empty
@@ -106,7 +100,8 @@ public class Main {
 
 		//Total Price
 		System.out.println("Total Price: " + cart.getTotalPrice());
+		System.out.println("------------------------------------------------------------------------------------------------------------------------");
 
-    }
+	}
 }
 

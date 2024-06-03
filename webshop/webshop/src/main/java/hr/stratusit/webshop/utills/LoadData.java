@@ -1,7 +1,7 @@
 package hr.stratusit.webshop.utills;
 
 import hr.stratusit.webshop.model.Boat;
-import hr.stratusit.webshop.model.RentalPeriod;
+import hr.stratusit.webshop.service.RentalPeriod;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
